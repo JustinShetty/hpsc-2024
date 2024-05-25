@@ -54,13 +54,13 @@ void run(int nmax, FMatrix& u, FMatrix& v, FMatrix& p, FMatrix& b) {
 				}
 			}
 			// p[:, -1] = p[:, -2]
-			for (auto row : p) row[row.size()-1] = row[row.size()-2];
+			for (auto j = 0; j < NY; j++) p[j][NX-1] = p[j][NX-2];
 			// p[0, :] = p[1, :]
-			p[0] = p[1];
+			for (auto i = 0; i < NX; i++) p[0][i] = p[1][i];
 			// p[:, 0] = p[:, 1]
-			for (auto row : p) row[0] = row[1];
+			for (auto j = 0; j < NY; j++) p[j][0] = p[j][1];
 			// p[-1, :] = 0
-			std::fill(p[p.size()-1].begin(), p[p.size()-1].end(), 0);
+			for (auto i = 0; i < NX; i++) p[NY-1][i] = 0.0;
 		}
 
 
