@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include "cuda_runtime.h"
 
 using std::pow;
 
@@ -106,10 +107,12 @@ void run(int nmax, FMatrix u, FMatrix v, FMatrix p, FMatrix b) {
 }
 
 int main() {
-	auto u = zeros(NY,NX);
-	auto v = zeros(NY,NX);
-	auto p = zeros(NY,NX);
-	auto b = zeros(NY,NX);
+	// auto u = zeros(NY,NX);
+	// auto v = zeros(NY,NX);
+	// auto p = zeros(NY,NX);
+	// auto b = zeros(NY,NX);
 
-	run(NT, u, v, p, b);
+	// run(NT, u, v, p, b);
+
+	cudaDeviceSynchronize();
 }
