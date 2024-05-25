@@ -8,12 +8,11 @@ const auto NX = 41;
 const auto NY = 41;
 const auto NT = 500;
 const auto NIT = 50;
-const auto dx = 2.0 / (NX-1);
-const auto dx2 = pow(dx, 2);
-const auto dy = 2.0 / (NY-1);
-const auto dy2 = pow(dy, 2);
+constexpr auto dx = 2.0 / (NX-1);
+constexpr auto dx2 = dx * dx;
+constexpr auto dy = 2.0 / (NY-1);
+constexpr auto dy2 = dy * dy;
 const auto dt = 0.01;
-
 const auto rho = 1.0;
 const auto nu = 0.02;
 
@@ -24,9 +23,9 @@ FMatrix zeros(int n, int m) {
 	return FMatrix(n, FVector(m, 0));
 }
 
-void run(int nmax, FMatrix u, FMatrix v, FMatrix p, FMatrix b) {
+void run(int nmax, FMatrix& u, FMatrix& v, FMatrix& p, FMatrix& b) {
 	for (auto n = 0; n < nmax; n++) {
-		// prepare b and p
+		// b
 		for (auto j = 1; j < NY - 1; j++) {
 			for (auto i = 1; i < NX - 1; i++) {
 				b[j][i] = (u[j][i+1] - u[j][i-1]) / (2 * dx) + (v[j+1][i] - v[j-1][i]) / (2 * dy);
@@ -34,9 +33,11 @@ void run(int nmax, FMatrix u, FMatrix v, FMatrix p, FMatrix b) {
 				b[j][i] -= pow((u[j][i+1] - u[j][i-1]) / (2 * dx), 2);
 				b[j][i] -= 2 * (u[j+1][i] - u[j-1][i]) / (2 * dy) * (v[j][i+1] - v[j][i-1]) / (2 * dx);
 				b[j][i] -= pow((v[j+1][i] - v[j-1][i]) / (2 * dy), 2);
-				b[j][i]*rho;
+				b[j][i] *= rho;
 			}
 		}
+
+		// p
 		for (auto it = 0; it < NIT; it++) {
 			auto pn = p;
 			for (auto j = 1; j < NY - 1; j++) {
@@ -47,7 +48,6 @@ void run(int nmax, FMatrix u, FMatrix v, FMatrix p, FMatrix b) {
 					p[j][i] /= 2 * (dx2 + dy2);
 				}
 			}
-			
 			// p[:, -1] = p[:, -2]
 			for (auto row : p) row[row.size()-1] = row[row.size()-2];
 			// p[0, :] = p[1, :]
@@ -81,27 +81,23 @@ void run(int nmax, FMatrix u, FMatrix v, FMatrix p, FMatrix b) {
 		}
 
 
-		// u[0, :] = 0
-		std::fill(u[0].begin(), u[0].end(), 0);
+		// u[0, :]  = 0
+		for (auto i = 0; i < NX; i++) u[0][i] = 0.0;
+		// u[:, 0]  = 0
+		for (auto j = 0; j < NY; j++) u[j][0] = 0.0;
+		// u[:, -1] = 0
+		for (auto j = 0; j < NY; j++) u[j][NX-1] = 0.0;
 		// u[-1, :] = 1
-		std::fill(u[u.size()-1].begin(), u[u.size()-1].end(), 1);
-		for(auto row : u) {
-			// u[:, 0] = 0
-			row[0] = 0;
-			// u[:, -1] = 0
-			row[row.size()-1] = 0;
-		}
+		for (auto i = 0; i < NX; i++) u[NY-1][i] = 1.0;
 
-		// v[0, :] = 0
-		std::fill(v[0].begin(), v[0].end(), 0);
+		// v[0, :]  = 0
+		for (auto i = 0; i < NX; i++) v[0][i] = 0.0;
 		// v[-1, :] = 0
-		std::fill(v[v.size()-1].begin(), v[v.size()-1].end(), 0);
-		for (auto row : v) {
-			// v[:, 0] = 0
-			row[0] = 0;
-			// v[:, -1] = 0
-			row[row.size()-1] = 0;
-		}
+		for (auto i = 0; i < NX; i++) v[NY-1][i] = 0.0;
+		// v[:, 0]  = 0
+		for (auto j = 0; j < NY; j++) v[j][0] = 0.0;
+		// v[:, -1] = 0
+		for (auto j = 0; j < NY; j++) v[j][NX-1] = 0.0;
 	}
 }
 
