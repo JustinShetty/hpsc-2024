@@ -21,6 +21,7 @@ b = np.zeros((ny, nx))
 X, Y = np.meshgrid(x, y)
 
 for n in range(nt):
+    plt.clf()
     for j in range(1, ny-1):
         for i in range(1, nx-1):
             b[j, i] = rho * (1 / dt *\
@@ -65,5 +66,4 @@ for n in range(nt):
     plt.quiver(X[::2, ::2], Y[::2, ::2], u[::2, ::2], v[::2, ::2])
     plt.title(f'Iteration {n}')
     plt.pause(.01)
-    plt.clf()
 plt.show()

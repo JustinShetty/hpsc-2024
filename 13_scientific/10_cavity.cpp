@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cmath>
 
@@ -24,6 +25,10 @@ FMatrix zeros(int n, int m) {
 }
 
 void run(int nmax, FMatrix& u, FMatrix& v, FMatrix& p, FMatrix& b) {
+	std::ofstream ufile("u.dat", std::ios::out | std::ios::trunc);
+	std::ofstream vfile("v.dat", std::ios::out | std::ios::trunc);
+	std::ofstream pfile("p.dat", std::ios::out | std::ios::trunc);
+
 	for (auto n = 0; n < nmax; n++) {
 		// b
 		for (auto j = 1; j < NY - 1; j++) {
@@ -98,7 +103,22 @@ void run(int nmax, FMatrix& u, FMatrix& v, FMatrix& p, FMatrix& b) {
 		for (auto j = 0; j < NY; j++) v[j][0] = 0.0;
 		// v[:, -1] = 0
 		for (auto j = 0; j < NY; j++) v[j][NX-1] = 0.0;
+
+		for(auto j = 0; j < NY; j++) {
+			for(auto i = 0; i < NX; i++) {
+				ufile << u[j][i] << " ";
+				vfile << v[j][i] << " ";
+				pfile << p[j][i] << " ";
+			}
+		}
+		ufile << "\n";
+		vfile << "\n";
+		pfile << "\n";
 	}
+
+	ufile.close();
+	vfile.close();
+	pfile.close();
 }
 
 int main() {
