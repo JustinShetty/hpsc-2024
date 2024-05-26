@@ -16,8 +16,6 @@
 		}                                                                                              \
 	} while (0)
 
-using std::pow;
-
 const auto NX = 41;
 const auto NY = 41;
 const auto NT = 500;
@@ -46,6 +44,8 @@ void cuda_mat_free(double **mat, int m) {
 }
 
 __global__ void kernel(double **u, double **v, double **p, double **b) {
+	// active_thread is used to skip threads that are out of bounds
+	// if we return early, grid.sync() will hang
 	bool active_thread = true;
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
 	if (tid >= NY * NX) active_thread = false;
@@ -60,9 +60,9 @@ __global__ void kernel(double **u, double **v, double **p, double **b) {
 	if (active_thread) {
 		b[j][i] = (u[j][i + 1] - u[j][i - 1]) / (2 * dx) + (v[j + 1][i] - v[j - 1][i]) / (2 * dy);
 		b[j][i] /= dt;
-		b[j][i] -= pow((u[j][i + 1] - u[j][i - 1]) / (2 * dx), 2);
+		b[j][i] -= std::pow((u[j][i + 1] - u[j][i - 1]) / (2 * dx), 2);
 		b[j][i] -= 2 * (u[j + 1][i] - u[j - 1][i]) / (2 * dy) * (v[j][i + 1] - v[j][i - 1]) / (2 * dx);
-		b[j][i] -= pow((v[j + 1][i] - v[j - 1][i]) / (2 * dy), 2);
+		b[j][i] -= std::pow((v[j + 1][i] - v[j - 1][i]) / (2 * dy), 2);
 		b[j][i] *= rho;
 	}
 	grid.sync();
@@ -163,11 +163,9 @@ int main() {
 	const auto N = NX * NY;
 	const auto tpb = deviceProp.maxThreadsPerBlock;
 	const auto num_blocks = (N + tpb - 1) / tpb;
-	void *args[] = {(void *)&u, (void *)&v, (void *)&p, (void *)&b};
+	void* args[] = {(void *)&u, (void *)&v, (void *)&p, (void *)&b};
 
-	std::ofstream ufile("u.dat", std::ios::out | std::ios::trunc);
-	std::ofstream vfile("v.dat", std::ios::out | std::ios::trunc);
-	std::ofstream pfile("p.dat", std::ios::out | std::ios::trunc);
+	std::ofstream ufile("u.dat"), vfile("v.dat"), pfile("p.dat");
 	for (auto n = 0; n < NT; n++) {
 		CUDA_CALL(cudaLaunchCooperativeKernel((void *)kernel, num_blocks, tpb, args));
 		CUDA_CALL(cudaDeviceSynchronize());
