@@ -2,3 +2,5 @@
 *.out
 .ipynb_checkpoints
 venv/
+.vscode/
+*.dat
