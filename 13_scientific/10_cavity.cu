@@ -7,9 +7,9 @@
 
 using std::pow;
 
-const auto NX = 5;
-const auto NY = 5;
-const auto NT = 10;
+const auto NX = 41;
+const auto NY = 41;
+const auto NT = 500;
 const auto NIT = 50;
 constexpr auto dx = 2.0 / (NX-1);
 constexpr auto dx2 = dx * dx;
@@ -141,24 +141,23 @@ int main() {
 	cudaLaunchCooperativeKernel((void*) kernel, (N+M-1)/M, M, args);
 	cudaDeviceSynchronize();
 
-	// std::ofstream ufile("u.dat", std::ios::out | std::ios::trunc);
-	// std::ofstream vfile("v.dat", std::ios::out | std::ios::trunc);
-	// std::ofstream pfile("p.dat", std::ios::out | std::ios::trunc);
-	// for (int l = 0 ; l < NT; l++) {
-	// 	for (int j = 0; j < NY; j++) {
-	// 		for (int i = 0; i < NX; i++) {
-	// 			// ufile << u_f2[at(j, i)] << " ";
-	// 			// vfile << v_f2[at(j, i)] << " ";
-	// 			// pfile << p[j][i] << " ";
-	// 		}
-	// 	}
-	// 	ufile << "\n";
-	// 	vfile << "\n";
-	// 	pfile << "\n";
-	// }
-	// ufile.close();
-	// vfile.close();
-	// pfile.close();
+	std::ofstream ufile("u.dat", std::ios::out | std::ios::trunc);
+	std::ofstream vfile("v.dat", std::ios::out | std::ios::trunc);
+	std::ofstream pfile("p.dat", std::ios::out | std::ios::trunc);
+	AddressTranslator at(NY, NX);
+	for (int j = 0; j < NY; j++) {
+		for (int i = 0; i < NX; i++) {
+			ufile << u_f2[at(j, i)] << " ";
+			vfile << v_f2[at(j, i)] << " ";
+			pfile << p_f2[at(j, i)] << " ";
+		}
+	}
+	ufile << "\n";
+	vfile << "\n";
+	pfile << "\n";
+	ufile.close();
+	vfile.close();
+	pfile.close();
 
 	for (auto& arr : {u_f2, v_f2, b_f2, p_f2}) cudaFree(arr);
 }
