@@ -13,21 +13,20 @@ def main():
     v = np.zeros((NY, NX))
     p = np.zeros((NY, NX))
 
+    # *.dat contain a line for every timestep with the Z-traversal of u,v, and p
+    # values are space-separated
     with open('u.dat', 'r') as f:
-        udata = f.readlines()
+        uraw = f.readlines()
     with open('v.dat', 'r') as f:
-        vdata = f.readlines()
+        vraw = f.readlines()
     with open('p.dat', 'r') as f:
-        pdata = f.readlines()
+        praw = f.readlines()
     
-    for n in range(len(udata)):
+    for n in range(len(uraw)):
         plt.clf()
-        u_flattened = udata[n].strip().split()
-        u_flattened = [float(val) for val in u_flattened if val]
-        v_flattened = vdata[n].strip().split()
-        v_flattened = [float(val) for val in v_flattened if val]
-        p_flattened = pdata[n].strip().split()
-        p_flattened = [float(val) for val in p_flattened if val]
+        u_flattened = [float(val) for val in uraw[n].strip().split() if val]
+        v_flattened = [float(val) for val in vraw[n].strip().split() if val]
+        p_flattened = [float(val) for val in praw[n].strip().split() if val]
 
         for j in range(NY):
             for i in range(NX):
